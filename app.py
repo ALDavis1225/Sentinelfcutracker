@@ -1,63 +1,86 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import datetime
 import streamlit as st
+import requests
+import pandas as pd
+import yfinance as yf
+from datetime import datetime
 
-# ---------- Data Collection Example: Fed Interest Rate (FRED) ----------
-def get_fed_rate():
-    url = "https://fred.stlouisfed.org/series/FEDFUNDS"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+# ------------------ Configuration ------------------
+FRED_API_KEY = 'YOUR_FRED_API_KEY'  # Replace with your own key
 
-    try:
-        rate_tag = soup.find('div', class_='series-meta-observation-value')
-        rate = float(rate_tag.text.strip().replace('%',''))
-        return rate
-    except:
-        return None
+# ------------------ FRED API Utility ------------------
+def fetch_fred_series(series_id, observation_count=1):
+    url = f"https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        'series_id': series_id,
+        'api_key': FRED_API_KEY,
+        'file_type': 'json',
+        'sort_order': 'desc',
+        'limit': observation_count
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if data['observations']:
+            return float(data['observations'][0]['value'])
+    return None
 
-# ---------- Data Collection Example: Local News Headlines ----------
-def get_local_headlines():
-    url = "https://rapidcityjournal.com/news/local/"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    headlines = []
+# ------------------ Market Index Utility ------------------
+def get_index_value(symbol):
+    ticker = yf.Ticker(symbol)
+    return ticker.history(period='1d')['Close'].iloc[-1]
 
-    for item in soup.select('h3 a')[:5]:
-        headline = item.get_text(strip=True)
-        link = item.get('href')
-        if link and not link.startswith('http'):
-            link = "https://rapidcityjournal.com" + link
-        headlines.append((headline, link))
+# ------------------ App Layout ------------------
+st.title("Sentinel FCU Economic Tracker v2")
 
-    return headlines
+# Interest Rates Section
+st.header("Interest Rates")
+fed_rate = fetch_fred_series("FEDFUNDS")
+mortgage_rate = fetch_fred_series("MORTGAGE30US")
 
-# ---------- Dashboard ----------
-st.title("Sentinel FCU Economic Tracker")
-
-# Display Fed Rate
-fed_rate = get_fed_rate()
-if fed_rate:
-    st.metric(label="Federal Funds Rate", value=f"{fed_rate}%")
+if fed_rate is not None:
+    st.metric("Federal Funds Rate", f"{fed_rate:.2f}%")
 else:
-    st.warning("Unable to retrieve Fed rate.")
+    st.warning("Fed rate unavailable")
 
-# Display Local News
-st.subheader("Local News Headlines")
-headlines = get_local_headlines()
-if headlines:
-    for title, link in headlines:
-        st.markdown(f"- [{title}]({link})")
+if mortgage_rate is not None:
+    st.metric("30-Year Mortgage Rate", f"{mortgage_rate:.2f}%")
 else:
-    st.warning("Unable to retrieve local news.")
+    st.warning("Mortgage rate unavailable")
 
-# Sample Visualization (Static Example for Prototype)
-st.subheader("Example: Unemployment Rate (Placeholder Data)")
-data = {
-    'Month': ['Jan', 'Feb', 'Mar', 'Apr'],
-    'Rate': [3.8, 3.9, 3.7, 3.8]
-}
-df = pd.DataFrame(data)
-st.line_chart(df.set_index('Month'))
+# Regional Indicator: SD Unemployment
+st.header("Regional Economic Indicators")
+sd_unemployment = fetch_fred_series("SDUR")
+if sd_unemployment is not None:
+    st.metric("South Dakota Unemployment Rate", f"{sd_unemployment:.2f}%")
+else:
+    st.warning("SD unemployment data unavailable")
+
+# Market Indices
+st.header("Market Indices")
+sp500 = get_index_value("^GSPC")
+nasdaq = get_index_value("^IXIC")
+st.metric("S&P 500", f"{sp500:,.2f}")
+st.metric("NASDAQ", f"{nasdaq:,.2f}")
+
+# Placeholder for Legislative Alerts
+st.header("Legislative Alerts")
+st.info("Coming soon: Summarized bills affecting credit unions.")
+
+# Placeholder for Local Business Trends
+st.header("Local Business Trends")
+st.info("Coming soon: Headlines on openings, closures, and economic impact.")
+
+# Placeholder for NCUA Competitor Trends
+st.header("NCUA Competitor Trends")
+st.info("Coming soon: Peer comparison from NCUA research.")
+
+# Placeholder for CUNA Data
+st.header("CUNA Insights")
+st.info("Coming soon: Reports and advocacy updates from CUNA.")
+
+# Alerts
+st.header("Automated Alerts")
+if fed_rate and fed_rate > 5.0:
+    st.error("Alert: Fed rate exceeds 5%! Monetary tightening likely.")
+if mortgage_rate and mortgage_rate > 7.0:
+    st.warning("Alert: Mortgage rates above 7% may impact lending.")
