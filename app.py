@@ -5,7 +5,7 @@ import yfinance as yf
 from datetime import datetime
 
 # ------------------ Configuration ------------------
-FRED_API_KEY = 'YOUR_FRED_API_KEY'  # Replace with your own key
+FRED_API_KEY = 'https://fred.stlouisfed.org/docs/api/api_key.html'  # Replace with your own key
 
 # ------------------ FRED API Utility ------------------
 def fetch_fred_series(series_id, observation_count=1):
