@@ -19,26 +19,10 @@ def fetch_fred_series(series_id, observation_count=1):
     }
     response = requests.get(url, params=params)
     if response.status_code == 200:
-        "file_type": "json",
-        "observation_start": "2020-01-01"
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    observations = data.get("observations", [])
-    
-    df = pd.DataFrame(observations)
-    df['date'] = pd.to_datetime(df['date'])
-    df['value'] = pd.to_numeric(df['value'], errors='coerce')
-    return df
-    st.subheader("Federal Funds Interest Rate Trend")
-try:
-    fed_df = get_fed_interest_rates()
-    st.line_chart(fed_df.set_index('date')['value'])
-    latest = fed_df.iloc[-1]
-    st.info(f"Latest Fed Funds Rate: {latest['value']}% on {latest['date'].strftime('%b %d, %Y')}")
-except Exception as e:
-    st.error("Failed to fetch interest rate data.")
-    st.text(str(e))
+        data = response.json()
+        if data['observations']:
+            return float(data['observations'][0]['value'])
+    return None
 
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
