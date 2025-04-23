@@ -64,7 +64,22 @@ st.metric("NASDAQ", f"{nasdaq:,.2f}")
 
 # Placeholder for Legislative Alerts
 st.header("Legislative Alerts")
-st.info("Coming soon: Summarized bills affecting credit unions.")
+import requests
+API_KEY = 'ice98ixPmVFcY8WBJbf9qohf0YvQDEdGB7ILqM54'
+headers = {'X-API-Key': API_KEY}
+params = {'query': 'credit union', 'limit': 5}
+response = requests.get('https://api.congress.gov/v3/bill', headers=headers, params=params)
+data = response.json()
+import streamlit as st
+for bill in data['bills']:
+    title = bill.get('title', 'No title available')
+    summary = bill.get('summary', 'No summary available')
+    url = bill.get('url', '#')
+    st.subheader(title)
+    st.write(summary)
+    st.markdown(f"[Read more]({url})")
+if 'lending' in summary.lower():
+    st.warning("This bill may affect credit union lending practices.")
 
 # Placeholder for Local Business Trends
 st.header("Local Business Trends")
