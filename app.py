@@ -62,7 +62,7 @@ nasdaq = get_index_value("^IXIC")
 st.metric("S&P 500", f"{sp500:,.2f}")
 st.metric("NASDAQ", f"{nasdaq:,.2f}")
 
-# Placeholder for Legislative Alerts
+# Legislative Alerts
 st.header("Legislative Alerts")
 import requests
 API_KEY = 'ice98ixPmVFcY8WBJbf9qohf0YvQDEdGB7ILqM54'
