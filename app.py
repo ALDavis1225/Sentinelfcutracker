@@ -8,12 +8,17 @@ from datetime import datetime
 FRED_API_KEY = '83709bc9a35d7d11c07bad8630ff8b2c'  # Replace with your own key
 
 # ------------------ FRED API Utility ------------------
-FED_FUNDS_RATE_SERIES = "FEDFUNDS"  # Federal Funds Effective Rate
-def get_fed_interest_rates():
+def fetch_fred_series(series_id, observation_count=1):
     url = f"https://api.stlouisfed.org/fred/series/observations"
     params = {
-        "series_id": FED_FUNDS_RATE_SERIES,
-        "api_key": FRED_API_KEY,
+        'series_id': series_id,
+        'api_key': FRED_API_KEY,
+        'file_type': 'json',
+        'sort_order': 'desc',
+        'limit': observation_count
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
         "file_type": "json",
         "observation_start": "2020-01-01"
     }
@@ -26,7 +31,6 @@ def get_fed_interest_rates():
     df['value'] = pd.to_numeric(df['value'], errors='coerce')
     return df
     st.subheader("Federal Funds Interest Rate Trend")
-
 try:
     fed_df = get_fed_interest_rates()
     st.line_chart(fed_df.set_index('date')['value'])
