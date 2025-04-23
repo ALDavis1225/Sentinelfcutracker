@@ -6,9 +6,9 @@ from datetime import datetime
 
 # ------------------ Configuration ------------------
 FRED_API_KEY = '83709bc9a35d7d11c07bad8630ff8b2c'  # Replace with your own key
-FED_FUNDS_RATE_SERIES = "FEDFUNDS"  # Federal Funds Effective Rate
 
 # ------------------ FRED API Utility ------------------
+FED_FUNDS_RATE_SERIES = "FEDFUNDS"  # Federal Funds Effective Rate
 def get_fed_interest_rates():
     url = f"https://api.stlouisfed.org/fred/series/observations"
     params = {
