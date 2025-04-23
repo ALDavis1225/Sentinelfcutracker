@@ -30,7 +30,7 @@ def get_index_value(symbol):
     return ticker.history(period='1d')['Close'].iloc[-1]
 
 # ------------------ App Layout ------------------
-st.title("Sentinel FCU Economic Tracker v2")
+st.title("Sentinel FCU Economic Tracker")
 
 # Interest Rates Section
 st.header("Interest Rates")
