@@ -8,21 +8,35 @@ from datetime import datetime
 FRED_API_KEY = '83709bc9a35d7d11c07bad8630ff8b2c'  # Replace with your own key
 
 # ------------------ FRED API Utility ------------------
-def fetch_fred_series(series_id, observation_count=1):
+FRED_API_KEY = "83709bc9a35d7d11c07bad8630ff8b2c"
+FED_FUNDS_RATE_SERIES = "FEDFUNDS"  # Federal Funds Effective Rate
+
+def get_fed_interest_rates():
     url = f"https://api.stlouisfed.org/fred/series/observations"
     params = {
-        'series_id': series_id,
-        'api_key': FRED_API_KEY,
-        'file_type': 'json',
-        'sort_order': 'desc',
-        'limit': observation_count
+        "series_id": FED_FUNDS_RATE_SERIES,
+        "api_key": FRED_API_KEY,
+        "file_type": "json",
+        "observation_start": "2020-01-01"
     }
     response = requests.get(url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        if data['observations']:
-            return float(data['observations'][0]['value'])
-    return None
+    data = response.json()
+    observations = data.get("observations", [])
+    
+    df = pd.DataFrame(observations)
+    df['date'] = pd.to_datetime(df['date'])
+    df['value'] = pd.to_numeric(df['value'], errors='coerce')
+    return df
+    st.subheader("Federal Funds Interest Rate Trend")
+
+try:
+    fed_df = get_fed_interest_rates()
+    st.line_chart(fed_df.set_index('date')['value'])
+    latest = fed_df.iloc[-1]
+    st.info(f"Latest Fed Funds Rate: {latest['value']}% on {latest['date'].strftime('%b %d, %Y')}")
+except Exception as e:
+    st.error("Failed to fetch interest rate data.")
+    st.text(str(e))
 
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
