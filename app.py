@@ -127,6 +127,7 @@ else:
 # Regional Indicator: SD Unemployment
 st.header("Regional Economic Indicators")
 sd_unemployment = fetch_fred_series("SDUR")
+
 if sd_unemployment is not None:
     st.metric("South Dakota Unemployment Rate", f"{sd_unemployment:.2f}%")
 else:
@@ -134,11 +135,11 @@ else:
 
 st.subheader("South Dakota Unemployment Rate Trend (Since 2020)")
 sd_trend_df = fetch_sd_unemployment_trend()
+
 if sd_trend_df is not None:
     st.line_chart(sd_trend_df.set_index('date')['value'])
 else:
     st.warning("Unable to fetch SD unemployment trend data.")
-    
 # Market Indices
 st.header("Market Indices")
 sp500 = get_index_value("^GSPC")
