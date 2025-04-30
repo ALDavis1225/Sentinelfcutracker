@@ -77,6 +77,7 @@ def fetch_sd_unemployment_trend():
         df['value'] = pd.to_numeric(df['value'], errors='coerce')
         return df[['date', 'value']]
     return None
+    
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
