@@ -23,7 +23,23 @@ def fetch_fred_series(series_id, observation_count=1):
         if data['observations']:
             return float(data['observations'][0]['value'])
     return None
-
+# Fetch historical Fed Funds Rate trend from 1/1/2020
+def fetch_fed_funds_trend():
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        'series_id': 'FEDFUNDS',
+        'api_key': FRED_API_KEY,
+        'file_type': 'json',
+        'observation_start': '2020-01-01'
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data['observations'])
+        df['date'] = pd.to_datetime(df['date'])
+        df['value'] = pd.to_numeric(df['value'], errors='coerce')
+        return df[['date', 'value']]
+    return None
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
@@ -42,6 +58,14 @@ if fed_rate is not None:
 else:
     st.warning("Fed rate unavailable")
 
+st.subheader("Federal Funds Rate Trend (Since 2020)")
+fed_trend_df = fetch_fed_funds_trend()
+
+if fed_trend_df is not None:
+    st.line_chart(fed_trend_df.set_index('date')['value'])
+else:
+    st.warning("Unable to fetch Fed Funds historical data.")
+    
 if mortgage_rate is not None:
     st.metric("30-Year Mortgage Rate", f"{mortgage_rate:.2f}%")
 else:
