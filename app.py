@@ -73,21 +73,6 @@ st.header("Interest Rates")
 fed_rate = fetch_fred_series("FEDFUNDS")
 mortgage_rate = fetch_fred_series("MORTGAGE30US")
 
-st.subheader("30-Year Mortgage Rate Trend (Since 2020)")
-mortgage_trend_df = fetch_mortgage_rate_trend()
-
-if mortgage_trend_df is not None:
-    st.line_chart(mortgage_trend_df.set_index('date')['value'])
-
-    # Check for significant jumps
-    recent_jump = mortgage_trend_df['rate_change'].iloc[-1]
-    if recent_jump > 0.5:
-        st.error(f"Alert: Mortgage rate jumped by {recent_jump:.2f}% last month!")
-    elif recent_jump > 0.25:
-        st.warning(f"Notice: Mortgage rate rose by {recent_jump:.2f}% last month.")
-else:
-    st.warning("Unable to fetch mortgage rate trend data.")
-
 if fed_rate is not None:
     st.metric("Federal Funds Rate", f"{fed_rate:.2f}%")
 else:
@@ -106,6 +91,21 @@ if mortgage_rate is not None:
 else:
     st.warning("Mortgage rate unavailable")
 
+st.subheader("30-Year Mortgage Rate Trend (Since 2020)")
+mortgage_trend_df = fetch_mortgage_rate_trend()
+
+if mortgage_trend_df is not None:
+    st.line_chart(mortgage_trend_df.set_index('date')['value'])
+
+    # Check for significant jumps
+    recent_jump = mortgage_trend_df['rate_change'].iloc[-1]
+    if recent_jump > 0.5:
+        st.error(f"Alert: Mortgage rate jumped by {recent_jump:.2f}% last month!")
+    elif recent_jump > 0.25:
+        st.warning(f"Notice: Mortgage rate rose by {recent_jump:.2f}% last month.")
+else:
+    st.warning("Unable to fetch mortgage rate trend data.")
+    
 # Regional Indicator: SD Unemployment
 st.header("Regional Economic Indicators")
 sd_unemployment = fetch_fred_series("SDUR")
