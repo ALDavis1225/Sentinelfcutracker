@@ -41,6 +41,26 @@ def fetch_fed_funds_trend():
         df['value'] = pd.to_numeric(df['value'], errors='coerce')
         return df[['date', 'value']]
     return None
+
+def fetch_mortgage_rate_trend():
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        'series_id': 'MORTGAGE30US',
+        'api_key': FRED_API_KEY,
+        'file_type': 'json',
+        'observation_start': '2020-01-01'
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data['observations'])
+        df['date'] = pd.to_datetime(df['date'])
+        df['value'] = pd.to_numeric(df['value'], errors='coerce')
+        df = df.set_index('date').resample('M').last().dropna().reset_index()  # Monthly rate trend
+        df['rate_change'] = df['value'].diff()
+        return df
+    return None
+    
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
@@ -53,6 +73,21 @@ st.title("Sentinel FCU Economic Tracker")
 st.header("Interest Rates")
 fed_rate = fetch_fred_series("FEDFUNDS")
 mortgage_rate = fetch_fred_series("MORTGAGE30US")
+
+st.subheader("30-Year Mortgage Rate Trend (Since 2020)")
+mortgage_trend_df = fetch_mortgage_rate_trend()
+
+if mortgage_trend_df is not None:
+    st.line_chart(mortgage_trend_df.set_index('date')['value'])
+
+    # Check for significant jumps
+    recent_jump = mortgage_trend_df['rate_change'].iloc[-1]
+    if recent_jump > 0.5:
+        st.error(f"Alert: Mortgage rate jumped by {recent_jump:.2f}% last month!")
+    elif recent_jump > 0.25:
+        st.warning(f"Notice: Mortgage rate rose by {recent_jump:.2f}% last month.")
+else:
+    st.warning("Unable to fetch mortgage rate trend data.")
 
 if fed_rate is not None:
     st.metric("Federal Funds Rate", f"{fed_rate:.2f}%")
