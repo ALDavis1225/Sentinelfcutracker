@@ -60,7 +60,6 @@ def fetch_mortgage_rate_trend():
         df['rate_change'] = df['value'].diff()
         return df
     return None
-    
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
