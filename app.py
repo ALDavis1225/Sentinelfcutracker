@@ -23,6 +23,7 @@ def fetch_fred_series(series_id, observation_count=1):
         if data['observations']:
             return float(data['observations'][0]['value'])
     return None
+    
 # Fetch historical Fed Funds Rate trend from 1/1/2020
 def fetch_fed_funds_trend():
     url = "https://api.stlouisfed.org/fred/series/observations"
