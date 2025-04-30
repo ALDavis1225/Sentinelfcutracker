@@ -132,13 +132,6 @@ if sd_unemployment is not None:
 else:
     st.warning("SD unemployment data unavailable")
 
-st.header("Regional Economic Indicators")
-sd_unemployment = fetch_fred_series("SDUR")
-if sd_unemployment is not None:
-    st.metric("South Dakota Unemployment Rate", f"{sd_unemployment:.2f}%")
-else:
-    st.warning("SD unemployment data unavailable")
-
 st.subheader("South Dakota Unemployment Rate Trend (Since 2020)")
 sd_trend_df = fetch_sd_unemployment_trend()
 
