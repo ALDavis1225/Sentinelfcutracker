@@ -134,7 +134,6 @@ else:
 
 st.subheader("South Dakota Unemployment Rate Trend (Since 2020)")
 sd_trend_df = fetch_sd_unemployment_trend()
-
 if sd_trend_df is not None:
     st.line_chart(sd_trend_df.set_index('date')['value'])
 else:
