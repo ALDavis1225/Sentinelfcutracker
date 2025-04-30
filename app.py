@@ -60,6 +60,23 @@ def fetch_mortgage_rate_trend():
         df['rate_change'] = df['value'].diff()
         return df
     return None
+
+def fetch_sd_unemployment_trend():
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        'series_id': 'SDUR',  # South Dakota Unemployment Rate
+        'api_key': FRED_API_KEY,
+        'file_type': 'json',
+        'observation_start': '2020-01-01'
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data['observations'])
+        df['date'] = pd.to_datetime(df['date'])
+        df['value'] = pd.to_numeric(df['value'], errors='coerce')
+        return df[['date', 'value']]
+    return None
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
@@ -114,6 +131,21 @@ if sd_unemployment is not None:
 else:
     st.warning("SD unemployment data unavailable")
 
+st.header("Regional Economic Indicators")
+sd_unemployment = fetch_fred_series("SDUR")
+if sd_unemployment is not None:
+    st.metric("South Dakota Unemployment Rate", f"{sd_unemployment:.2f}%")
+else:
+    st.warning("SD unemployment data unavailable")
+
+st.subheader("South Dakota Unemployment Rate Trend (Since 2020)")
+sd_trend_df = fetch_sd_unemployment_trend()
+
+if sd_trend_df is not None:
+    st.line_chart(sd_trend_df.set_index('date')['value'])
+else:
+    st.warning("Unable to fetch SD unemployment trend data.")
+    
 # Market Indices
 st.header("Market Indices")
 sp500 = get_index_value("^GSPC")
