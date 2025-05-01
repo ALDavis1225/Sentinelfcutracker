@@ -81,7 +81,7 @@ def fetch_sd_unemployment_trend():
 # ------------------ Market Index Utility ------------------
 def get_index_value(symbol):
     ticker = yf.Ticker(symbol)
-    return ticker.history(period='1d')['Close'].iloc[-1]
+    return ticker.history(period='5d')['Close'].iloc[-1]
 
 # ------------------ App Layout ------------------
 st.title("Sentinel FCU Economic Tracker")
@@ -140,6 +140,7 @@ if sd_trend_df is not None:
     st.line_chart(sd_trend_df.set_index('date')['value'])
 else:
     st.warning("Unable to fetch SD unemployment trend data.")
+    
 # Market Indices
 st.header("Market Indices")
 sp500 = get_index_value("^GSPC")
