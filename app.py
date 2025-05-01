@@ -143,10 +143,14 @@ else:
     
 # Market Indices
 st.header("Market Indices")
-sp500 = get_index_value("^GSPC")
 nasdaq = get_index_value("^IXIC")
-st.metric("S&P 500", f"{sp500:,.2f}")
 st.metric("NASDAQ", f"{nasdaq:,.2f}")
+
+try:
+    sp500 = get_index_value("^GSPC")
+    st.metric("S&P 500", f"{sp500:,.2f}")
+except yf.exceptions.YFRateLimitError:
+    st.warning("Rate limit hit. Try again in a few minutes.")
 
 # Legislative Alerts
 st.header("Legislative Alerts")
